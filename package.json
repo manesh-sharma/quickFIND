@@ -15,6 +15,7 @@
     "electron": "^41.1.1"
   },
   "dependencies": {
-    "electron-reload": "^2.0.0-alpha.1"
+    "electron-reload": "^2.0.0-alpha.1",
+    "fuse.js": "^7.3.0"
   }
 }
