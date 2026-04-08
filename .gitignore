@@ -1,1 +1,16 @@
-node_modules
+# Dependencies
+node_modules/
+
+# ✅ Cache file — can be huge (50MB+), never commit this
+data/files.json
+
+# Build output
+renderer/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -4,6 +4,12 @@ const { buildIndex, searchFiles, loadCache } = require('../indexer/indexer');
 const { app, BrowserWindow, ipcMain, shell, globalShortcut } = require('electron');
 const path = require('path');
 
+// ✅ Dev vs production URL
+const isDev = !app.isPackaged;
+const RENDERER_URL = isDev
+  ? 'http://localhost:5173'
+  : `file://${path.join(__dirname, '../renderer/dist/index.html')}`;
+
 let win;
 function createWindow() {
   win = new BrowserWindow({
@@ -19,9 +25,8 @@ function createWindow() {
       contextIsolation: true,
     },
   });
-  
-  win.setResizable(false);
-  win.loadURL('http://localhost:5173');
+
+  win.loadURL(RENDERER_URL);
 
   // Hide when focus lost
   win.on('blur', () => {
@@ -29,9 +34,9 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   console.log('Loading cache...');
-  loadCache();
+  await loadCache(); // ✅ awaited — non-blocking async read
 
   createWindow();
 
@@ -45,18 +50,17 @@ app.whenReady().then(() => {
     }
   });
 
+  // ✅ Build index in background — scans Downloads, Desktop, Documents, Music, Pictures, Videos
   setTimeout(() => {
     console.log('Rebuilding index in background...');
-    buildIndex('C:/Users/HP');
+    buildIndex(); // uses ROOT_PATHS from indexer.js
   }, 2000);
 });
 
-// ✅ FIX: Add this handler
 ipcMain.handle('search-files', async (event, query) => {
   return searchFiles(query).slice(0, 20);
 });
 
-// ✅ Open file
 ipcMain.on('open-file', (event, filePath) => {
   shell.openPath(filePath);
 });
@@ -71,4 +75,4 @@ app.on('activate', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
-});
+});
